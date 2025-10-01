@@ -22,7 +22,7 @@ TYPE_OPTIONS = [
 # ----------------------------------------------------------------------
 
 def generate_excel_file(month, year):
-    """Génère le fichier Excel formaté pour le mois et l'année donnés."""
+    """Génère le fichier Excel formaté pour le mois et l'année donnés, SANS couleur de cellule sur les jours ouvrés."""
     
     try:
         start_date = date(year, month, 1)
@@ -35,14 +35,9 @@ def generate_excel_file(month, year):
         messagebox.showerror("Erreur de Date", "Le mois ou l'année est invalide.")
         return
 
-    # --- CHANGEMENT CLÉ POUR LE NOM DU FICHIER ---
-    # '%m' -> numéro du mois (09, 10)
-    # '%B' -> nom complet du mois (September, October)
+    # Format du nom du fichier: TO DO LIST-MM-MonthName YYYY.xlsx
     formatted_month = start_date.strftime('%m-%B') 
-    
     file_name = f'TO DO LIST-{formatted_month} {year}.xlsx'
-    # Exemple: TO DO LIST-10-October 2025 FINAL.xlsx
-    # ---------------------------------------------
     
     all_sheets = []
     current_date = start_date
@@ -83,24 +78,25 @@ def generate_excel_file(month, year):
             
             if sheet['type'] == 'work':
                 day_color = TAB_COLORS[sheet['day_of_week']]
-                body_format = workbook.add_format({'bg_color': day_color})
                 
+                # 1. Couleur de l'onglet (GARDÉE)
                 worksheet.set_tab_color(day_color)
                 
-                # Écrire les EN-TÊTES
+                # Écrire les EN-TÊTES avec formatage (GARDÉ)
                 for col_num, value in enumerate(HEADERS):
                     worksheet.write(0, col_num, value, header_format)
                 
-                # Appliquer la couleur de fond
-                worksheet.conditional_format('A2:G1000', {'type': 'no_blanks', 'format': body_format})
+                # LA COULEUR DES CELLULES DE CORPS EST RETIRÉE ICI.
+                
+                # Définir la largeur des colonnes (GARDÉE)
                 worksheet.set_column('A:G', 20)
                 
-                # Listes Déroulantes (Status et Type)
+                # Listes Déroulantes (Status et Type) (GARDÉES)
                 worksheet.data_validation('B2:B1000', {'validate': 'list', 'source': STATUS_OPTIONS})
                 worksheet.data_validation('C2:C1000', {'validate': 'list', 'source': TYPE_OPTIONS})
                 
             else:
-                # Feuille WEEKEND
+                # Feuille WEEKEND (GARDÉE)
                 worksheet.set_tab_color('#D3D3D3') 
                 worksheet.conditional_format('A1:G1000', {'type': 'no_blanks', 'format': light_gray_format})
                 worksheet.set_column('A:G', 20, light_gray_format) 
@@ -113,7 +109,7 @@ def generate_excel_file(month, year):
                 weekend_data.to_excel(writer, sheet_name=sheet['name'], index=False)
                 
         writer.close()
-        messagebox.showinfo("Succès", f"Fichier '{file_name}' créé avec succès dans le même dossier que l'application.")
+        messagebox.showinfo("Succès", f"Fichier '{file_name}' créé avec succès.")
         
     except Exception as e:
         messagebox.showerror("Erreur de Fichier", f"Impossible de générer le fichier : {e}")
