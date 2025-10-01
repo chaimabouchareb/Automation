@@ -35,12 +35,14 @@ def generate_excel_file(month, year):
         messagebox.showerror("Erreur de Date", "Le mois ou l'année est invalide.")
         return
 
-    # Utilisation de strftime pour obtenir le nom du mois (dépend des locales)
-    try:
-        month_name = start_date.strftime('%B').capitalize()
-    except:
-        month_name = str(month).zfill(2)
-
+    # --- CHANGEMENT CLÉ POUR LE NOM DU FICHIER ---
+    # '%m' -> numéro du mois (09, 10)
+    # '%B' -> nom complet du mois (September, October)
+    formatted_month = start_date.strftime('%m-%B') 
+    
+    file_name = f'TO DO LIST-{formatted_month} {year}.xlsx'
+    # Exemple: TO DO LIST-10-October 2025 FINAL.xlsx
+    # ---------------------------------------------
     
     all_sheets = []
     current_date = start_date
@@ -60,8 +62,6 @@ def generate_excel_file(month, year):
         current_date += timedelta(days=1)
         
     # 2. Créer le fichier Excel
-    file_name = f'TO DO LIST - {month_name} {year} FINAL.xlsx'
-    
     try:
         writer = pd.ExcelWriter(file_name, engine='xlsxwriter') 
 
@@ -127,7 +127,6 @@ class ExcelGeneratorApp:
         self.master = master
         master.title("Générateur de Liste TO DO")
 
-        # Configurer le conteneur principal
         self.frame = tk.Frame(master, padx=20, pady=20)
         self.frame.pack()
 
@@ -137,7 +136,7 @@ class ExcelGeneratorApp:
 
         self.entry_month = tk.Entry(self.frame)
         self.entry_month.grid(row=0, column=1, pady=5)
-        self.entry_month.insert(0, str(date.today().month)) # Valeur par défaut: mois actuel
+        self.entry_month.insert(0, str(date.today().month))
 
         # Labels et Champs de saisie (Année)
         self.label_year = tk.Label(self.frame, text="Année (ex: 2025):")
@@ -145,14 +144,14 @@ class ExcelGeneratorApp:
 
         self.entry_year = tk.Entry(self.frame)
         self.entry_year.grid(row=1, column=1, pady=5)
-        self.entry_year.insert(0, str(date.today().year)) # Valeur par défaut: année actuelle
+        self.entry_year.insert(0, str(date.today().year))
 
         # Bouton Générer
         self.generate_button = tk.Button(
             self.frame, 
             text="Générer Fichier Excel", 
             command=self.validate_and_generate,
-            bg='#3CB371', # Vert Moyen
+            bg='#3CB371',
             fg='white',
             padx=10,
             pady=5
@@ -167,13 +166,13 @@ class ExcelGeneratorApp:
             
             if 1 <= month <= 12 and 2020 <= year <= 2050:
                 self.generate_button.config(state=tk.DISABLED, text="Génération en cours...")
-                self.master.update() # Force l'actualisation de l'UI
+                self.master.update()
                 
                 generate_excel_file(month, year)
                 
                 self.generate_button.config(state=tk.NORMAL, text="Générer Fichier Excel")
             else:
-                messagebox.showerror("Erreur de Saisie", "Veuillez entrer un mois entre 1 et 12 et une année valide.")
+                messagebox.showerror("Erreur de Saisie", "Veuillez entrer un mois entre 1 et 12 et une année valide (2020-2050).")
         
         except ValueError:
             messagebox.showerror("Erreur de Saisie", "Veuillez entrer des nombres entiers pour le mois et l'année.")
